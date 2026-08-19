@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>加速度の値</title>
+</head>
+<body>
+    <div id="txt">ここにデータを表示</div>
+    
+<script>
+  // 現在値
+  let aX = 0, aY = 0, aZ = 0;
+
+  // 5秒判定用
+  let startMag = null;        // 5秒開始時の加速度の大きさ
+  let startTime = null;
+  let flashing = false;
+
+  const txt = document.getElementById('txt');
+
+  // 加速度（大きさ）を計算
+  function magnitude(x, y, z) {
+    return Math.sqrt(x * x + y * y + z * z);
+  }
+
+  // 画面の点滅（背景色を切り替える）
+  function startFlashing() {
+    if (flashing) return;
+    flashing = true;
+    let on = false;
+
+    const id = setInterval(() => {
+      on = !on;
+      document.body.style.backgroundColor = on ? '#ff3333' : '';
+    }, 250);
+
+    // 点滅は無限ではなく、必要なら停止する（例：さらに5秒後に止める）
+    setTimeout(() => {
+      clearInterval(id);
+      flashing = false;
+      document.body.style.backgroundColor = '';
+    }, 5000);
+  }
+
+  // スタート（ページ読み込み or 最初の値取得後に行う）
+  function begin5sWindow() {
+    startTime = Date.now();
+    startMag = magnitude(aX, aY, aZ);
+    // 5秒後に判定
+    setTimeout(() => {
+      if (startMag == null) return;
+
+      const currentMag = magnitude(aX, aY, aZ);
+
+      // 「減少していない」判定：current >= start のとき点滅
+      // 多少のブレを許すなら currentMag > startMag * 0.98 みたいに閾値を調整
+      if (currentMag >= startMag * 0.98) {
+        startFlashing();
+      }
+    }, 5000);
+  }
+
+  // 加速度イベント
+  window.addEventListener('devicemotion', function(event) {
+    if (!event.acceleration) return;
+
+    aX = event.acceleration.x ?? 0;
+    aY = event.acceleration.y ?? 0;
+    aZ = event.acceleration.z ?? 0;
+
+    // 最初のイベントを受け取った時点で5秒判定を開始（値が取れてからスタートするため）
+    if (startTime === null) {
+      begin5sWindow();
+    }
+  });
+
+  // 表示更新
+  setInterval(function() {
+    txt.innerHTML = "X: " + aX + "<br>Y: " + aY + "<br>Z: " + aZ;
+  }, 33);
+</script>
+
+</body>
+</html>
+
+<!---
+参考：
+スマホの加速度センサを使う
+https://kkblab.com/make/javascript/acc.html　
+
+あとはDDGのAIチャット
+-->
