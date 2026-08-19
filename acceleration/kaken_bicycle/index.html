@@ -14,9 +14,9 @@
 
         //加速度のセンサの値が変化すると実行するイベント
         window.addEventListener('devicemotion', function(event) {
-            aX = event.accelerationIncludingGravity.x;
-            aY = event.accelerationIncludingGravity.y;
-            aZ = event.accelerationIncludingGravity.z;
+            aX = event.acceleration.x;
+            aY = event.acceleration.y;
+            aZ = event.acceleration.z;
             
         });
 
